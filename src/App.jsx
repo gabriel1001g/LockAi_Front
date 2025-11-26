@@ -20,7 +20,7 @@ export default function App() {
    useEffect(() => {
     const carregarDados = async () => {
       try {
-        const response = await fetch("http://localhost:5095/usuario/1");
+        const response = await fetch("https://lockai.azurewebsites.net/usuario/1");
         const data = await response.json();
         setDados(data);
       } catch (error) {

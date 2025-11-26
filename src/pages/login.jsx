@@ -15,7 +15,7 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       // Fazendo a requisição POST para o endpoint /Conecte-se com os dados de login
-      const response = await fetch("http://localhost:5095/auth/login", {
+      const response = await fetch("https://lockai.azurewebsites.net/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
