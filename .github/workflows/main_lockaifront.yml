@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'lockaifront'
           slot-name: 'Production'
-          package: .
-          
+          # CORREÇÃO CRUCIAL: Aponta para a pasta 'dist'
+          package: './dist'
