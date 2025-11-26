@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import CadastroPlanos from "./pages/CadastroPlanos"; 
@@ -32,34 +32,31 @@ export default function App() {
   }, []);
 
   return (
-    <Router>
+    <HashRouter>
       <div>
         <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
-        <Route path="/cadastro-planos" element={<CadastroPlanos />} />
-        <Route path="/Cadastro" element={<Cadastro />} />
-        <Route path="/CodigoSenha" element={<CodigoSenha/>}/>
-        <Route path="/Pagamento" element={<Pagamento/>}/>
-        <Route path="/AlterarSenha" element={<AlterarSenha />}/>
-        <Route path="/home" element={<Home />} />
-        <Route path="/categorias" element={<Categorias />} />
-        <Route path="/tipoobjetos" element={<TipoObjetos />} />
-        <Route path="/locacao" element={<Locacao />} />
-        <Route path="/planos" element={<Planos />} />
-        <Route path="/reserva" element={<Reserva />} />
-        
-
+          <Route path="/" element={<Login />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/cadastro-planos" element={<CadastroPlanos />} />
+          <Route path="/Cadastro" element={<Cadastro />} />
+          <Route path="/CodigoSenha" element={<CodigoSenha/>}/>
+          <Route path="/Pagamento" element={<Pagamento/>}/>
+          <Route path="/AlterarSenha" element={<AlterarSenha />}/>
+          <Route path="/home" element={<Home />} />
+          <Route path="/categorias" element={<Categorias />} />
+          <Route path="/tipoobjetos" element={<TipoObjetos />} />
+          <Route path="/locacao" element={<Locacao />} />
+          <Route path="/planos" element={<Planos />} />
+          <Route path="/reserva" element={<Reserva />} />
         </Routes>
-
       </div>
-      
-    </Router>
+    </HashRouter>
+  );
 
     
    
 
     
-  );
+ 
   
 }
