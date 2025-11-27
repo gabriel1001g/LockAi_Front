@@ -107,14 +107,14 @@ export default function Cadastro() {
         }),
       });
 
-      // 🔸 Verifica se o servidor respondeu com erro
+      // Verifica se o servidor respondeu com erro
       if (!response.ok) {
         const errorText = await response.text();
         alert("Erro ao cadastrar usuário: " + errorText);
         return;
       }
 
-      // 🔸 Converte a resposta em JSON (usuário criado)
+      // Converte a resposta em JSON (usuário criado)
       const data = await response.json();
       console.log("Usuário cadastrado:", data);
 

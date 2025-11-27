@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@theme{
+    --color-azul: #000d4d;
+    --color-azul-sec: #0066FF;
+    --color-azul-ter: #001a66;
+    --color-azul-bg: #000740;
+}
+
+body{
+    overflow: hidden;
+    background-color: #000740;
+}
