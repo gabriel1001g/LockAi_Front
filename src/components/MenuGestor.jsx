@@ -50,7 +50,7 @@ export default function MenuGestor() {
 
         {/* ==================== CONTA ==================== */}
         <NavLink
-          to="/conta/conta"
+          to="/conta/contagestor"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"

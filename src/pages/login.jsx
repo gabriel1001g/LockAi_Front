@@ -60,7 +60,7 @@ export default function Login() {
       // Definimos o tipo de usuário e o token manualmente para contornar a falta no backend.
       const authData = {
         // 🚨 SIMULAÇÃO: Definimos como 1 (Usuário Comum) para liberar a Home.
-        tipoUsuarioId: 1, 
+        tipoUsuarioId: 2, 
         
         // 🚨 SIMULAÇÃO: Geramos um token falso para satisfazer o AuthContext.
         token: "fake-jwt-token-for-dev-12345", 
