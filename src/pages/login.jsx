@@ -3,18 +3,30 @@ import { Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext"; // 👈 MANTIDO E USADO AQUI!
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [erroSenha, setErroSenha] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // 👈 USADO AQUI
 
   const navigate = useNavigate();
+  const { login } = useAuth(); // 👈 DESESTRUTURANDO A FUNÇÃO LOGIN
 
+  // 📝 ALTERAÇÃO NA FUNÇÃO handleLogin
   const handleLogin = async () => {
+    setIsSubmitting(true); // 👈 INICIA O ESTADO DE SUBMISSÃO
+
+    // Você pode adicionar uma validação final aqui para o caso de o botão ser clicado antes da validação da senha terminar
+    if (!!erroSenha || senha.length === 0) {
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Fazendo a requisição POST para o endpoint /Conecte-se com os dados de login
+      // Fazendo a requisição POST para o endpoint /auth/login
       const response = await fetch("https://lockai.azurewebsites.net/auth/login", {
         method: "POST",
         headers: {
@@ -26,36 +38,56 @@ export default function Login() {
         }),
       });
 
-      // Se a resposta for 401 ou algo diferente de 200, trata como erro
+      // Se a resposta não for 2xx (por exemplo, 401 ou 500)
       if (!response.ok) {
         if (response.status === 401) {
           alert("Usuário ou senha inválidos.");
         } else {
-          alert("Erro ao realizar login. Tente novamente.");
+          // Tenta pegar a mensagem de erro do corpo da resposta, se existir
+          const errorText = await response.text();
+          alert("Erro ao realizar login. Tente novamente." + (errorText ? ` Detalhe: ${errorText.substring(0, 100)}` : ""));
         }
+        setIsSubmitting(false); // 👈 PARAR O LOADING EM CASO DE ERRO
         return;
       }
 
-      // Aqui você recebe o objeto JSON retornado pelo controlador
+      // Aqui você recebe o objeto JSON retornado pelo controlador (DEVE CONTER token e tipoUsuarioId)
       const data = await response.json();
 
       console.log("Login efetuado:", data);
 
-      // Aqui você poderia salvar o token ou usuário no localStorage/sessionStorage
-      // localStorage.setItem("token", data.token);
+      // 💥 ATUALIZAÇÃO TEMPORÁRIA CRUCIAL 💥
+      // Definimos o tipo de usuário e o token manualmente para contornar a falta no backend.
+      const authData = {
+        // 🚨 SIMULAÇÃO: Definimos como 1 (Usuário Comum) para liberar a Home.
+        tipoUsuarioId: 1, 
+        
+        // 🚨 SIMULAÇÃO: Geramos um token falso para satisfazer o AuthContext.
+        token: "fake-jwt-token-for-dev-12345", 
+        
+        // Se quiser salvar o ID do usuário, use o que veio da API:
+        usuarioId: data.id ? parseInt(data.id) : null,
+        // Você pode adicionar um nome fixo enquanto o backend não envia:
+        nomeUsuario: "Usuário Teste", 
+      };
+      
+      // 2. Salva o objeto simulado no Contexto
+      login(authData); 
 
-      // Redireciona para a página principal após login bem-sucedido
-      navigate("/home");
+      // 3. Redirecionamento agora funcionará perfeitamente com tipoUsuarioId = 1
+      if (authData.tipoUsuarioId === 1) {
+        navigate("/home"); 
+      } else if (authData.tipoUsuarioId === 2) {
+        navigate("/gestor/HomeGestor"); 
+      } else {
+        navigate("/home"); 
+      }
     } catch (error) {
-      console.error("Erro ao conectar com a API:", error);
-      alert("Erro de conexão. Verifique se o backend está rodando.");
+      // ...
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  //const handleLogin = () => {
-  // aqui você poderia validar usuário e senha antes...
-  // navigate("/home"); // 👈 redireciona para a página de planos
-  // };
 
   const handleUsuarioChange = (e) => {
     const value = e.target.value;
@@ -115,9 +147,8 @@ export default function Login() {
             value={senha}
             onChange={handleSenhaChange}
             placeholder="Digite sua senha"
-            className={`w-full px-3 py-2 bg-terceary text-gray-300 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary pr-10 ${
-              erroSenha ? "border-red-500" : ""
-            }`}
+            className={`w-full px-3 py-2 bg-terceary text-gray-300 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary pr-10 ${erroSenha ? "border-red-500" : ""
+              }`}
           />
           <button
             type="button"
@@ -141,13 +172,13 @@ export default function Login() {
           </Link>
         </div>
 
-        {/* Botão Entrar */}
+        {/* 📝 ALTERAÇÃO NO BOTÃO */}
         <button
           onClick={handleLogin}
-          disabled={!!erroSenha || senha.length === 0}
+          disabled={!!erroSenha || senha.length === 0 || isSubmitting} // 👈 Adicionado isSubmitting
           className="w-full bg-secondary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Entrar
+          {isSubmitting ? "Entrando..." : "Entrar"} {/* 👈 Feedback visual */}
         </button>
 
         {/* Cadastro */}

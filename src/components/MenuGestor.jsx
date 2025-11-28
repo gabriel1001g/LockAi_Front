@@ -7,12 +7,11 @@ export default function MenuGestor() {
       className="absolute bottom-0 mx-auto mt-6 bg-slate-900 text-white border-t border-slate-700 w-full left-0 rounded-t-2xl shadow-lg"
       aria-label="Menu de navegação"
     >
-      {/* Menu em grid com 4 colunas */}
       <div className="grid grid-cols-4 gap-1 px-3 py-2 text-sm">
         
         {/* ==================== INÍCIO ==================== */}
         <NavLink
-          to="/home"
+          to="/gestor/HomeGestor"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -25,7 +24,7 @@ export default function MenuGestor() {
 
         {/* ==================== LOCAÇÕES ==================== */}
         <NavLink
-          to="/categorias"
+          to="/gestor/PlanoCategoria"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -38,7 +37,7 @@ export default function MenuGestor() {
 
         {/* ==================== REQUERIMENTO ==================== */}
         <NavLink
-          to="/requerimento"
+          to="/gestor/requerimento"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -51,7 +50,7 @@ export default function MenuGestor() {
 
         {/* ==================== CONTA ==================== */}
         <NavLink
-          to="/conta"
+          to="/conta/conta"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
