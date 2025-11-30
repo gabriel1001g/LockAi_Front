@@ -3,7 +3,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
 
 import "swiper/css";
-import { FreeMode } from "swiper/modules";
+
 
 import "swiper/css/pagination";
 import armario from "../assets/img/armario.jpg";

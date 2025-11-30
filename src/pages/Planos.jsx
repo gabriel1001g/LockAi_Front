@@ -1,8 +1,20 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MenuRodape from "../components/MenuRodape";
 import BotaoVoltar from "../components/BotaoVoltar";
+import { useLocacao } from "../contexts/LocacaoContext";
 
 export default function Planos() {
+  const { atualizarLocacao } = useLocacao();
+  const navigate = useNavigate();
+
+  const selecionarPlano = (idPlano, nomePlano, valorPlano) => {
+    atualizarLocacao({ 
+        idPlanoLocacao: idPlano, // <--- NOVO: ID do plano
+        plano: nomePlano, 
+        valor: valorPlano 
+    });
+    navigate("/Locacao");
+  };
   return (
     <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
       <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
@@ -16,9 +28,8 @@ export default function Planos() {
         <div>
           <h2 className="text-white font-bold text-lg mb-4">Planos</h2>
           
-          {/* Plano Semestral */}
-          
-          <Link to="/Locacao" className="block mb-5">
+          {/* Plano Semestral - USANDO ONCLICK */}
+          <div onClick={() => selecionarPlano(1, "Semestral", 60.00)} className="block mb-5 cursor-pointer transform hover:scale-105 transition-transform">
            <img
               src="/src/assets/img/armario2.jpg"
               alt="Armário"
@@ -30,12 +41,13 @@ export default function Planos() {
                 <strong className="text-white">R$ 60,00</strong>
               </div>
             </div>
+          </div>
             
-          </Link>
+          
           
 
-          {/* Plano Anual */}
-          <Link to="/Locacao" className="block">
+         {/* Plano Anual - USANDO ONCLICK */}
+          <div onClick={() => selecionarPlano(2, "Anual", 120.00)} className="block cursor-pointer transform hover:scale-105 transition-transform">
             <img
               src="/src/assets/img/armario2.jpg"
               alt="Armário"
@@ -47,7 +59,7 @@ export default function Planos() {
                 <strong className="text-white">R$ 120,00</strong>
               </div>
             </div>
-          </Link>
+          </div>
 
           <MenuRodape />
         </div>

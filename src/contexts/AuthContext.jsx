@@ -1,21 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, createContext, useContext, useEffect } from 'react';
 
 // 1. Criação do Contexto
 const AuthContext = createContext();
 
 // Função customizada para usar o contexto
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext); // <-- Se esta for a linha 9
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+  }
+  return context;
 };
 
 // 2. Provedor do Contexto
 export const AuthProvider = ({ children }) => {
-  const navigate = useNavigate();
-  
-  // Pega o estado inicial do localStorage, se existir
+  // 1. NOVO ESTADO: Adicione um estado de carregamento
+  const [isLoading, setIsLoading] = useState(true);
+
   const [user, setUser] = useState(() => {
-    // Tenta obter o objeto 'user' (que deve conter token e tipoUsuarioId)
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
@@ -27,6 +29,9 @@ export const AuthProvider = ({ children }) => {
     } else {
       localStorage.removeItem("user");
     }
+
+    // 🚨 NOVO: Define isLoading como false após a verificação inicial
+    setIsLoading(false);
   }, [user]);
 
   // Função de Login: Salva os dados do usuário (incluindo token e tipoUsuarioId)
@@ -38,7 +43,6 @@ export const AuthProvider = ({ children }) => {
   // Função de Logout: Limpa o estado e redireciona
   const logout = () => {
     setUser(null);
-    navigate("/login");
   };
 
   // Objeto de valor para o Provedor
@@ -50,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     // Garante que tipoUsuarioId seja null se user for null
     tipoUsuarioId: user ? user.tipoUsuarioId : null,
     token: user ? user.token : null,
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

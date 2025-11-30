@@ -56,38 +56,37 @@ export default function Login() {
 
       console.log("Login efetuado:", data);
 
-      // 💥 ATUALIZAÇÃO TEMPORÁRIA CRUCIAL 💥
-      // Definimos o tipo de usuário e o token manualmente para contornar a falta no backend.
-      const authData = {
-        // 🚨 SIMULAÇÃO: Definimos como 1 (Usuário Comum) para liberar a Home.
-        tipoUsuarioId: 2, 
-        
-        // 🚨 SIMULAÇÃO: Geramos um token falso para satisfazer o AuthContext.
-        token: "fake-jwt-token-for-dev-12345", 
-        
-        // Se quiser salvar o ID do usuário, use o que veio da API:
-        usuarioId: data.id ? parseInt(data.id) : null,
-        // Você pode adicionar um nome fixo enquanto o backend não envia:
-        nomeUsuario: "Usuário Teste", 
-      };
-      
-      // 2. Salva o objeto simulado no Contexto
-      login(authData); 
+  const authData = {
+        
+        token: data.token, // Lê o token da raiz
+        
+        // 🚨 Mapeia para a nova propriedade 'tipoUsuarioId' (retornada pelo Backend)
+        tipoUsuarioId: data.usuario?.tipoUsuarioId ? parseInt(data.usuario.tipoUsuarioId, 10) : 1, 
+        
+        id: data.usuario?.id ? parseInt(data.usuario.id, 10) : null, 
 
-      // 3. Redirecionamento agora funcionará perfeitamente com tipoUsuarioId = 1
-      if (authData.tipoUsuarioId === 1) {
-        navigate("/home"); 
-      } else if (authData.tipoUsuarioId === 2) {
-        navigate("/gestor/HomeGestor"); 
-      } else {
-        navigate("/home"); 
-      }
-    } catch (error) {
-      // ...
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        nomeUsuario: data.usuario?.login || "Usuário Teste", 
+      };
+      
+      // 2. Salva o objeto mapeado no Contexto
+      login(authData); 
+console.log("Tipo de Usuário LIDO pelo Frontend:", authData.tipoUsuarioId);
+      
+      
+      // 3. Redirecionamento com o tipoUsuarioId agora mapeado corretamente
+      if (authData.tipoUsuarioId === 1) {
+        navigate("/home"); 
+      } else if (authData.tipoUsuarioId === 2) {
+        navigate("/gestor/HomeGestor"); 
+      } else {
+        navigate("/home"); 
+      }
+    } catch (error) {
+      // ...
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleUsuarioChange = (e) => {
     const value = e.target.value;

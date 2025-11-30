@@ -1,18 +1,17 @@
-import { Link, useLocation } from "react-router-dom";
-import BotaoVoltar from "../components/BotaoVoltar"; // Assumindo que você tem este componente
-import MenuRodape from "../components/MenuRodape"; // Assumindo que você tem este componente
+import { Link } from "react-router-dom";
+import BotaoVoltar from "../components/BotaoVoltar"; 
+import MenuRodape from "../components/MenuRodape"; 
+import { useLocacao } from "../contexts/LocacaoContext";
 
 export default function Reserva() {
-    const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
+    const { dadosLocacao } = useLocacao(); // 👈 Pegar dados do Contexto
     
-    // Captura os parâmetros da URL
-    const posicao = queryParams.get('posicao') || 'Não informado';
-    const localizacao = queryParams.get('local') || 'Não informado';
-    
-    
-    const plano = "Plano Anual";
-    const preco = "R$120,00";
+    // Se por acaso o usuário der refresh na página e perder o contexto, use valores padrão
+    const posicao = dadosLocacao.posicao || 'Não informado';
+    const localizacao = dadosLocacao.localizacao || 'Não informado';
+    const plano = dadosLocacao.plano || 'Não selecionado';
+    const preco = dadosLocacao.valor ? `R$ ${dadosLocacao.valor.toFixed(2).replace('.', ',')}` : 'R$ 0,00';
+    const tipo = dadosLocacao.tipoObjeto || '';
 
     return (
         
@@ -28,16 +27,21 @@ export default function Reserva() {
 
                 <div className="flex flex-col items-center">
                     
-                    {/* Imagem do Armário com borda arredondada */}
+                    {/* Exemplo: Imagem Dinâmica se quiser */}
                     <img
-                        src="/src/assets/img/armario.jpg" // Use seu caminho de imagem
+                        src="/src/assets/img/armario.jpg" 
                         alt="Armário"
                         className="rounded-xl w-full border border-gray-700 shadow-xl mb-8"
                     />
 
-                    {/* Informações da Reserva */}
                     <div className="w-full px-2 space-y-4 text-sm font-light">
                         
+                        {/* Linha: Tipo */}
+                        <div className="flex justify-between items-center text-md font-normal mb-2">
+                             <span>Tipo</span>
+                             <strong className="text-white">{tipo}</strong>
+                        </div>
+
                         {/* Linha: Plano e Preço */}
                         <div className="flex justify-between items-center text-lg font-normal mb-6">
                             <span>{plano}</span>
@@ -55,35 +59,25 @@ export default function Reserva() {
                             <span className="font-normal">Localização</span>
                             <span className="font-semibold">{localizacao}</span>
                         </div>
-                        
                     </div>
 
                     {/* Botões */}
                     <div className="flex justify-between w-full mt-10 space-x-4">
                         <Link to="/locacao" className="w-1/2">
-                            {/* Botão Voltar (fundo azul) */}
                             <button className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold transition-colors">
                                 Voltar
                             </button>
                         </Link>
                         
-                        <Link 
-                           to="/pagamento" // Rota para a página de Pagamento
-                           className="w-1/2"
-                        >
-                            <button 
-                                className="w-full py-3 rounded-xl bg-white text-blue-600 hover:bg-gray-200 font-bold transition-colors"
-                            >
+                        <Link to="/pagamento" className="w-1/2">
+                            <button className="w-full py-3 rounded-xl bg-white text-blue-600 hover:bg-gray-200 font-bold transition-colors">
                                 Avançar
                             </button>
                         </Link>
                     </div>
                 </div>
                 <MenuRodape /> 
-
             </div>
-            
-            
         </div>
     );
 }

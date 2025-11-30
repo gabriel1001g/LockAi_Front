@@ -1,14 +1,26 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "swiper/css/pagination";
 import armario from "../assets/img/armario.jpg";
 import MenuRodape from "../components/MenuRodape";
 import armario_correspondencia from "../assets/img/armario_correspondencia.jpg";
 import BotaoVoltar from "../components/BotaoVoltar";
+import { useLocacao } from "../contexts/LocacaoContext";
 
 export default function TipoObjetos() {
+  const { atualizarLocacao } = useLocacao();
+  const navigate = useNavigate();
+
+  const selecionarTipo = (idTipo, nomeTipo, nomeObjeto) => {
+    atualizarLocacao({ 
+        idTipoObjeto: idTipo, // <--- NOVO: ID do tipo
+        objeto: nomeObjeto,  // Ex: Armário
+        tipoObjeto: nomeTipo  // Ex: Escolar
+    });
+    navigate("/planos");
+  };
   return (
     <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
       <div></div>
@@ -38,7 +50,11 @@ export default function TipoObjetos() {
           }}
         >
           <SwiperSlide>
-            <Link to="/planos" className="block w-full h-full">
+           <div 
+              // ALTERADO: Adicionado o ID 1
+              onClick={() => selecionarTipo(1, "Escolar", "Armário")} 
+              className="cursor-pointer block w-full h-full"
+          >
             <div className="bg-blue-600 text-white rounded-2xl p-20 flex justify-center items-center mb-20">
               <img
                 src={armario}
@@ -46,7 +62,7 @@ export default function TipoObjetos() {
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
-            </Link>
+            </div>
           </SwiperSlide>
         </Swiper>
         <div className="mb-2 mt-6">
@@ -67,7 +83,11 @@ export default function TipoObjetos() {
             }}
           >
             <SwiperSlide>
-                <Link to="/planos" className="block w-full h-full">
+                <div 
+                // ALTERADO: Adicionado o ID 2
+                onClick={() => selecionarTipo(2, "Correspondência", "Armário")}
+                className="cursor-pointer block w-full h-full"
+            >
               <div className="bg-blue-600 text-white rounded-2xl p-20 flex justify-center items-center mb-20">
                 <img
                   src={armario_correspondencia}
@@ -75,7 +95,8 @@ export default function TipoObjetos() {
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
-              </Link>
+              </div>
+              
             </SwiperSlide>
           </Swiper>
           <MenuRodape></MenuRodape>

@@ -9,6 +9,8 @@ export const useLocacao = () => {
 export const LocacaoProvider = ({ children }) => {
   // Estado para armazenar os dados da locação
   const [dadosLocacao, setDadosLocacao] = useState({
+    idObjeto: null, 
+    idPlanoLocacao: null,
     objeto: null, // Ex: "Armário", "Notebook"
     tipoObjeto: null, // Ex: "Escolar", "Correspondência"
     plano: null, // Ex: "Semestral", "Anual"
