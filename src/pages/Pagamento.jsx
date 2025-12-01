@@ -5,9 +5,8 @@ import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocacao } from "../contexts/LocacaoContext";
 import { useAuth } from "../contexts/AuthContext";
 
-
 // ** IMPORTANTE: Troque esta URL pela sua URL base da API **
-const API_URL = "https://lockai.azurewebsites.net"; 
+const API_URL = "https://lockai.azurewebsites.net";
 
 export default function Pagamento() {
   const navigate = useNavigate();
@@ -24,68 +23,74 @@ export default function Pagamento() {
 
   const handleEnviarComprovante = async () => {
     
-    // 1. ** VERIFICAÇÃO E CONSTRUÇÃO DO PAYLOAD (IDs) **
-    // A API espera: IdUsuario, IdPlanoLocacao, IdObjeto
-
-    // Verifica se o usuário está logado e possui ID
-    if (!user || !user.id || !user.token) { // 🚨 Adicionado: !user.token
-        alert("Erro: Usuário não autenticado ou token ausente. Faça login novamente.");
-        return;
-    }
+    // 1. ** VALIDAÇÃO E EXTRAÇÃO DOS DADOS **
     
-    // Verifica se os dados da locação (IDs) foram coletados nas telas anteriores
+    // Verifica se o usuário está logado e possui ID e Token
+    if (!user || !user.id || !user.token) {
+      alert("Erro: Usuário não autenticado ou token ausente. Faça login novamente.");
+      return;
+    } 
+    
+    // Verifica se os dados da locação (IDs) foram coletados
     if (!dadosLocacao.idPlanoLocacao || !dadosLocacao.idObjeto) {
-        alert("Erro: Dados de Plano ou Objeto faltando. Por favor, volte e selecione.");
-        return;
+      alert(
+        `Erro: Dados de locação incompletos. Plano: ${dadosLocacao.idPlanoLocacao}, Objeto: ${dadosLocacao.idObjeto}. Volte e selecione.`
+      );
+      return;
     }
 
+    // 🚨 CORREÇÃO PRINCIPAL: Enviando todos os IDs como STRING
+    // Isso evita problemas de desserialização (NULL) no backend do .NET
     const payload = {
-        IdUsuario: user.id, // Usando user.id (esperado)
-        IdPlanoLocacao: dadosLocacao.idPlanoLocacao, // ID vindo do contexto
-        IdObjeto: dadosLocacao.idObjeto, // ID vindo do contexto
+        IdUsuario: String(user.id), // Força a ser string
+        IdPlanoLocacao: String(dadosLocacao.idPlanoLocacao), // Força a ser string
+        IdObjeto: String(dadosLocacao.idObjeto), // Força a ser string
     };
 
     setComprovanteEnviado(true);
-console.log("Token JWT sendo enviado:", user.token);
+    console.log("Token JWT sendo enviado:", user.token);
     console.log("Enviando Proposta para API:", payload);
 
-    
     try {
-        const response = await fetch(`${API_URL}/PropostaLocacao`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Se precisar de token, descomente e ajuste a linha abaixo:
-                'Authorization': `Bearer ${user.token}` 
-            },
-            body: JSON.stringify(payload)
-        });
+      // A rota mais comum para APIs .NET é com /api/ antes do controlador
+      const response = await fetch(`${API_URL}/api/PropostaLocacao`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText || 'Falha desconhecida.'}`);
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Erro ${response.status}: ${errorText || "Falha desconhecida."}`
+        );
+      }
 
-        const data = await response.json();
-        console.log("Proposta criada com sucesso:", data);
-        
-        // 3. ** FINALIZAÇÃO BEM SUCEDIDA **
-        alert("Proposta de Locação enviada com sucesso! Aguardando confirmação de pagamento.");
-        limparLocacao(); // Limpa o carrinho
-        navigate("/home"); // Volta para home
-        
+      const data = await response.json();
+      console.log("Proposta criada com sucesso:", data); 
+      
+      alert("Proposta de Locação enviada com sucesso! Aguardando confirmação.");
+      limparLocacao();
+      navigate("/home");
     } catch (error) {
-        console.error("Erro ao enviar proposta:", error.message);
-        alert(`Erro ao finalizar locação: ${error.message}.`);
+      console.error("Erro ao enviar proposta:", error.message);
+      alert(`Erro ao finalizar locação: ${error.message}.`);
     } finally {
-        setComprovanteEnviado(false);
+      setComprovanteEnviado(false);
     }
-  };
+  }; 
 
   // Formatação para exibição
   const preco = dadosLocacao.valor
     ? `R$ ${dadosLocacao.valor.toFixed(2).replace(".", ",")}`
     : "R$ 0,00";
+
+  const nomePlanoExibicao = dadosLocacao.nomePlano || "--";
+  const posicaoExibicao = dadosLocacao.posicao || "--";
+  const localizacaoExibicao = dadosLocacao.localizacao || "--";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
@@ -105,7 +110,7 @@ console.log("Token JWT sendo enviado:", user.token);
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400 text-sm">Plano</p>
-              <p className="text-white font-medium">{dadosLocacao.plano || '--'}</p>
+              <p className="text-white font-medium">{nomePlanoExibicao}</p>
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-sm">Valor</p>
@@ -119,17 +124,16 @@ console.log("Token JWT sendo enviado:", user.token);
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400 text-sm">Posição</p>
-              <p className="text-white font-medium">{dadosLocacao.posicao || '--'}</p>
+              <p className="text-white font-medium">{posicaoExibicao}</p>
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-sm">Localização</p>
-              <p className="text-white font-medium">{dadosLocacao.localizacao || '--'}</p>
+              <p className="text-white font-medium">{localizacaoExibicao}</p>
             </div>
           </div>
         </div>
 
-        {/* ... (QR Code e Botões mantidos iguais) ... */}
-        {/* QR Code */}
+        {/* QR Code (Mantido igual) */}
         <div className="flex flex-col gap-6 mb-6">
           <h2 className="text-lg font-semibold text-white text-center">QRCODE PIX</h2>
           

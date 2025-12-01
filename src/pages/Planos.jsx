@@ -10,7 +10,7 @@ export default function Planos() {
   const selecionarPlano = (idPlano, nomePlano, valorPlano) => {
     atualizarLocacao({ 
         idPlanoLocacao: idPlano, // <--- NOVO: ID do plano
-        plano: nomePlano, 
+        nomePlano: nomePlano, 
         valor: valorPlano 
     });
     navigate("/Locacao");

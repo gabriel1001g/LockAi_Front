@@ -1,3 +1,5 @@
+// src/contexts/LocacaoContext.jsx
+
 import React, { createContext, useContext, useState } from "react";
 
 const LocacaoContext = createContext();
@@ -9,14 +11,19 @@ export const useLocacao = () => {
 export const LocacaoProvider = ({ children }) => {
   // Estado para armazenar os dados da locação
   const [dadosLocacao, setDadosLocacao] = useState({
-    idObjeto: null, 
-    idPlanoLocacao: null,
-    objeto: null, // Ex: "Armário", "Notebook"
-    tipoObjeto: null, // Ex: "Escolar", "Correspondência"
-    plano: null, // Ex: "Semestral", "Anual"
-    valor: null, // Ex: 60.00, 120.00
-    posicao: null, // Ex: "Alto", "Médio"
-    localizacao: null, // Ex: "Nº 001"
+    
+    // 🚨 APENAS DADOS DE OBJETO ESPECÍFICO E PLANO:
+    
+    // 1. OBJETO (Armário/Item selecionado na tela Locacao.jsx com mapeamento estático)
+    idObjeto: null,       // O ID necessário para a requisição de pagamento
+    nomeObjeto: null,     // Nome para exibição (Ex: "Armário A1")
+    posicao: null,        // Posição (Ex: "Alto")
+    localizacao: null,    // Local (Ex: "Nº 001")
+    
+    // 2. PLANO (selecionado em Planos.jsx)
+    idPlanoLocacao: null, // O ID necessário para a requisição de pagamento
+    nomePlano: null,      // Nome do Plano para exibição (Ex: "Semestral")
+    valor: null,          // Valor para exibição e cálculo
   });
 
   // Função para atualizar partes do estado
@@ -27,12 +34,13 @@ export const LocacaoProvider = ({ children }) => {
   // Função para limpar os dados (após finalizar)
   const limparLocacao = () => {
     setDadosLocacao({
-      objeto: null,
-      tipoObjeto: null,
-      plano: null,
-      valor: null,
+      idObjeto: null,
+      nomeObjeto: null,
       posicao: null,
       localizacao: null,
+      idPlanoLocacao: null,
+      nomePlano: null,
+      valor: null,
     });
   };
 

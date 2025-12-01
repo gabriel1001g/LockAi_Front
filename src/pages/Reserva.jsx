@@ -1,26 +1,31 @@
+// src/pages/Reserva.jsx
+
 import { Link } from "react-router-dom";
 import BotaoVoltar from "../components/BotaoVoltar"; 
 import MenuRodape from "../components/MenuRodape"; 
 import { useLocacao } from "../contexts/LocacaoContext";
 
 export default function Reserva() {
-    const { dadosLocacao } = useLocacao(); // 👈 Pegar dados do Contexto
+    const { dadosLocacao } = useLocacao();
     
-    // Se por acaso o usuário der refresh na página e perder o contexto, use valores padrão
-    const posicao = dadosLocacao.posicao || 'Não informado';
-    const localizacao = dadosLocacao.localizacao || 'Não informado';
-    const plano = dadosLocacao.plano || 'Não selecionado';
-    const preco = dadosLocacao.valor ? `R$ ${dadosLocacao.valor.toFixed(2).replace('.', ',')}` : 'R$ 0,00';
-    const tipo = dadosLocacao.tipoObjeto || '';
+    // 🚨 CORREÇÃO: Lendo as chaves CORRETAS do contexto
+    const armário = dadosLocacao.nomeObjeto || "Armário não selecionado"; 
+    const posicaoArmario = dadosLocacao.posicao || "N/A";
+    const local = dadosLocacao.localizacao || "N/A";
+    const planoSelecionado = dadosLocacao.nomePlano || "Plano não selecionado";
+    const valorPlano = dadosLocacao.valor ? `R$ ${dadosLocacao.valor.toFixed(2).replace('.', ',')}` : "R$ 0,00";
+
+    // Criando uma variável para exibir a POSIÇÃO + NOME, como um "Tipo" genérico.
+    const tipoArmarioDisplay = `${armário} (${posicaoArmario})`;
 
     return (
         
         <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
-              <div></div>
-              <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
+            <div></div>
+            <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
                 <div className="flex justify-between items-center mb-4">
-                  <BotaoVoltar />
-                  <h1 className="text-2xl font-semibold text-white">Reserva</h1>
+                    <BotaoVoltar />
+                    <h1 className="text-2xl font-semibold text-white">Reserva</h1>
                 </div>
         
                 <div className="w-70 h-[2px] bg-blue-500 mb-4"></div>
@@ -38,26 +43,31 @@ export default function Reserva() {
                         
                         {/* Linha: Tipo */}
                         <div className="flex justify-between items-center text-md font-normal mb-2">
-                             <span>Tipo</span>
-                             <strong className="text-white">{tipo}</strong>
+                            <span>Armário Selecionado</span>
+                            {/* 🚨 USANDO VARIÁVEL CORRIGIDA */}
+                            <strong className="text-white">{tipoArmarioDisplay}</strong> 
                         </div>
 
                         {/* Linha: Plano e Preço */}
                         <div className="flex justify-between items-center text-lg font-normal mb-6">
-                            <span>{plano}</span>
-                            <strong className="text-xl font-semibold">{preco}</strong>
+                            {/* 🚨 USANDO VARIÁVEL CORRIGIDA */}
+                            <span>{planoSelecionado}</span>
+                            {/* 🚨 USANDO VARIÁVEL CORRIGIDA */}
+                            <strong className="text-xl font-semibold">{valorPlano}</strong> 
                         </div>
                         
                         {/* Linha: Posição */}
                         <div className="flex justify-between">
                             <span className="font-normal">Posição</span>
-                            <span className="font-semibold">{posicao}</span>
+                            {/* 🚨 USANDO VARIÁVEL CORRIGIDA */}
+                            <span className="font-semibold">{posicaoArmario}</span> 
                         </div>
                         
                         {/* Linha: Localização */}
                         <div className="flex justify-between">
-                            <span className="font-normal">Localização</span>
-                            <span className="font-semibold">{localizacao}</span>
+                            <span className="font-normal">Localização (Nº)</span>
+                            {/* 🚨 USANDO VARIÁVEL CORRIGIDA */}
+                            <span className="font-semibold">{local}</span> 
                         </div>
                     </div>
 
