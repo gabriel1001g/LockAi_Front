@@ -87,7 +87,7 @@ export default function Cadastro() {
       };
 
       // 🔸 Faz o POST para a API
-     const response = await fetch("https://lockai.azurewebsites.net/Usuario", {
+     const response = await fetch("https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net/Usuario", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

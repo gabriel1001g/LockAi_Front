@@ -27,7 +27,7 @@ export default function Login() {
 
     try {
       // Fazendo a requisição POST para o endpoint /auth/login
-      const response = await fetch("https://lockai.azurewebsites.net/auth/login", {
+      const response = await fetch("https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

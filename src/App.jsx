@@ -18,6 +18,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // import Requerimento from "./pages/gestor/Requerimento";
 import Conta from "./pages/conta/Conta";
 import Perfil from "./pages/conta/Perfil";
+import AprovacaoLocacoes from "./pages/gestor/AprovacaoLocacoes";
+import ContaGestor from "./pages/conta/ContaGestor";
 
 
 export default function App() {
@@ -62,6 +64,8 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={[2]} />}>
           <Route path="/gestor/HomeGestor" element={<HomeGestor />} />
           <Route path="/gestor/PlanoCategoria" element={<PlanoCategoria />} />
+          <Route path="/gestor/AprovacaoLocacoes" element={<AprovacaoLocacoes />} />
+          <Route path="/conta/ContaGestor" element={<ContaGestor />} />
           {/* <Route path="/gestor/Requerimento" element={<Requerimento />} /> */}
         </Route>
 

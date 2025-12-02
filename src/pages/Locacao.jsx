@@ -1,118 +1,177 @@
-// src/pages/Locacao.jsx
-
 import { useNavigate } from "react-router-dom";
 import MenuRodape from "../components/MenuRodape";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocacao } from "../contexts/LocacaoContext";
-import { useState } from "react"; // Removed useEffect
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { Loader2, AlertTriangle } from 'lucide-react';
 
-// 🚨 MAPEAMENTO ESTÁTICO DE OBJETOS
-// Este mapeamento é usado para simular o banco de dados e obter o ID do Objeto
-const mapeamentoObjetos = {
-    "Alto_Nº 001": { id: 1, nome: "Armário A1", posicao: "Alto", localizacao: "Nº 001" },
-    "Alto_Nº 002": { id: 2, nome: "Armário A2", posicao: "Alto", localizacao: "Nº 002" },
-    "Alto_Nº 003": { id: 3, nome: "Armário A3", posicao: "Alto", localizacao: "Nº 003" },
-    "Médio_Nº 001": { id: 4, nome: "Armário M1", posicao: "Médio", localizacao: "Nº 001" },
-    "Médio_Nº 002": { id: 5, nome: "Armário M2", posicao: "Médio", localizacao: "Nº 002" },
-    "Médio_Nº 003": { id: 6, nome: "Armário M3", posicao: "Médio", localizacao: "Nº 003" },
-    "Baixo_Nº 001": { id: 7, nome: "Armário B1", posicao: "Baixo", localizacao: "Nº 001" },
-    "Baixo_Nº 002": { id: 8, nome: "Armário B2", posicao: "Baixo", localizacao: "Nº 002" },
-    "Baixo_Nº 003": { id: 9, nome: "Armário B3", posicao: "Baixo", localizacao: "Nº 003" },
-};
+const API_URL = "https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net";
+
+// 🚨 STATUS DO OBJETO: Assumindo que 0 (zero) corresponde a "Ativo" / "Disponível"
+const STATUS_ATIVO = 0; 
 
 export default function Locacao() {
-    // 🚨 REMOVIDOS estados de API: objetosDisponiveis, isLoading, error
-    const [posicaoSelecionada, setPosicaoSelecionada] = useState(null);
+    const { token } = useAuth();
     const { atualizarLocacao } = useLocacao();
     const navigate = useNavigate();
-    // 🚨 REMOVIDO useAuth (token não é mais necessário aqui)
 
-    // 🚨 REMOVIDO useEffect de fetchObjetos
+    // ESTADOS PARA OS DADOS REAIS DA API
+    const [objetosDisponiveis, setObjetosDisponiveis] = useState({}); // Objetos agrupados por Localidade Secundária
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    // ESTADOS DE SELEÇÃO
+    const [localidadeSecundariaSelecionada, setLocalidadeSecundariaSelecionada] = useState(null);
+    const [locaisDisponiveis, setLocaisDisponiveis] = useState([]); // Objetos que pertencem à Localidade Secundária selecionada
 
-    const selecionarLocal = (local) => {
-        if (!posicaoSelecionada) return;
+    // 1. FUNÇÃO PARA BUSCAR TODOS OS OBJETOS E FILTRAR NO FRONT-END
+    const fetchObjetos = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // 🚨 CHAMA O ENDPOINT GERAL /Objeto (que retorna TUDO)
+            const response = await fetch(`${API_URL}/Objeto`, { 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        const chave = `${posicaoSelecionada}_${local}`;
-        const objetoSelecionado = mapeamentoObjetos[chave];
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Erro ao buscar objetos.");
+            }
 
-        if (!objetoSelecionado) {
-            alert(`Erro: Armário na posição ${chave} não mapeado.`);
-            return;
+            const data = await response.json();
+            
+            // Pega a lista real de objetos, tratando o formato do Json.NET
+            const objetosReais = data.$values || data; 
+
+            // 🚨 FILTRAGEM NO FRONT-END: Filtra apenas objetos com situacao = 0 (Ativo)
+            const OBJETOS_ATIVOS = objetosReais.filter(obj => 
+                obj.situacao === STATUS_ATIVO
+            );
+
+            // AGRUPA OBJETOS PELA LOCALIDADE SECUNDÁRIA (SUA NOVA "POSIÇÃO")
+            const objetosAgrupados = OBJETOS_ATIVOS.reduce((acc, obj) => {
+                const key = obj.localidadeSecundaria;
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+                acc[key].push(obj);
+                return acc;
+            }, {});
+
+            setObjetosDisponiveis(objetosAgrupados);
+
+        } catch (err) {
+            console.error("Erro ao carregar e filtrar objetos:", err);
+            setError("Não foi possível carregar os objetos. Verifique a conexão com a API.");
+        } finally {
+            setIsLoading(false);
         }
+    }, [token]);
+    
+    useEffect(() => {
+        fetchObjetos();
+    }, [fetchObjetos]);
 
-        // Usa os dados do mapeamento estático
+    // 2. HANDLER DE SELEÇÃO DE POSIÇÃO/LOCALIDADE SECUNDÁRIA
+    const handleSelecionarLocalidadeSecundaria = (localidadeSecundaria) => {
+        setLocalidadeSecundariaSelecionada(localidadeSecundaria);
+        // Define os objetos disponíveis para esta Localidade Secundária
+        setLocaisDisponiveis(objetosDisponiveis[localidadeSecundaria] || []);
+    };
+    
+    // 3. HANDLER DE SELEÇÃO DO OBJETO FINAL (LEVA PARA RESERVA)
+    const selecionarObjeto = (objeto) => {
+        // Objeto selecionado é um item completo do JSON da API
         atualizarLocacao({
-        idObjeto: objetoSelecionado.id, 
-        
-        // As chaves devem corresponder ao LocacaoContext:
-        nomeObjeto: objetoSelecionado.nome,    // Ex: "Armário A1"
-        posicao: objetoSelecionado.posicao,    // Ex: "Alto"
-        localizacao: local,                    // Ex: "Nº 001"
-    });
+            idObjeto: objeto.id, 
+            nomeObjeto: objeto.nome, 
+            posicao: objeto.localidadeSecundaria, // Localidade Secundária como Posição
+            localizacao: objeto.localidadeTercearia, // Localidade Terciária como Localização
+            localidadePrimaria: objeto.localidadePrimaria
+        });
 
         navigate("/reserva");
     };
 
-    // 🚨 GERANDO AS LOCALIZAÇÕES (Nº 001, Nº 002, etc.) DE FORMA ESTÁTICA
-    // Isso simula os locais disponíveis para a Posição selecionada
-    const locaisDisponiveis = [
-        "Nº 001",
-        "Nº 002",
-        "Nº 003",
-        // Adicione mais se necessário
-    ];
+    const listaLocalidadesSecundarias = Object.keys(objetosDisponiveis);
 
+    // 4. ESTRUTURA VISUAL DO COMPONENTE
     return (
         <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
-            <div></div>
             <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
+                
                 {/* Cabeçalho */}
                 <div className="flex justify-between items-center mb-4">
                     <BotaoVoltar />
-                    <h1 className="text-2xl font-semibold text-white">Locação</h1>
+                    <h1 className="text-2xl font-semibold text-white">Locação de Objetos</h1>
                 </div>
 
                 {/* Linha divisória */}
                 <div className="w-full h-px bg-blue-500 mb-6"></div>
 
-                {/* Posições */}
-                <h4 className="text-lg font-bold mb-3">Posições</h4>
-                <div className="mb-5">
-                    {["Alto", "Médio", "Baixo"].map((pos) => (
-                        <div
-                            key={pos}
-                            onClick={() => setPosicaoSelecionada(pos)}
-                            className={`p-3 mb-3 rounded-lg cursor-pointer transition-colors ${
-                                posicaoSelecionada === pos
-                                    ? "bg-blue-600 hover:bg-blue-700"
-                                    : "bg-gray-800 hover:bg-gray-700"
-                            }`}
-                        >
-                            {pos}
-                        </div>
-                    ))}
-                </div>
+                {/* Loading e Erro */}
+                {isLoading && (
+                    <div className="flex justify-center items-center h-40">
+                        <Loader2 className="animate-spin text-blue-500 mr-2" /> Carregando e filtrando objetos...
+                    </div>
+                )}
+                {error && (
+                    <div className="flex items-center text-red-400 p-3 bg-red-900/30 rounded-lg">
+                        <AlertTriangle size={20} className="mr-2" /> {error}
+                    </div>
+                )}
 
-                {/* Localização */}
-                <h4 className="text-lg font-bold mb-3">Localização</h4>
-                <div>
-                    {locaisDisponiveis.map((loc) => (
-                        <div
-                            key={loc}
-                            onClick={() => selecionarLocal(loc)}
-                            className={`block p-3 mb-3 rounded-lg cursor-pointer transition-colors ${
-                                posicaoSelecionada
-                                    ? "bg-gray-800 hover:bg-blue-600"
-                                    : "bg-gray-900 opacity-50 cursor-not-allowed"
-                            }`}
-                        >
-                            {loc}
+                {/* Posições / Localidades Secundárias */}
+                {!isLoading && !error && (
+                    <>
+                        <h4 className="text-lg font-bold mb-3">Selecione a Localidade (Ex: Térreo, Zona Sul)</h4>
+                        <div className="mb-5 max-h-40 overflow-y-auto">
+                            {listaLocalidadesSecundarias.length === 0 ? (
+                                <p className="text-gray-400">Nenhum objeto ativo disponível para locação.</p>
+                            ) : (
+                                listaLocalidadesSecundarias.map((localidade) => (
+                                    <div
+                                        key={localidade}
+                                        onClick={() => handleSelecionarLocalidadeSecundaria(localidade)}
+                                        className={`p-3 mb-3 rounded-lg cursor-pointer transition-colors ${
+                                            localidadeSecundariaSelecionada === localidade
+                                                ? "bg-blue-600 hover:bg-blue-700"
+                                                : "bg-gray-800 hover:bg-gray-700"
+                                        }`}
+                                    >
+                                        {localidade} ({objetosDisponiveis[localidade].length} disponíveis)
+                                    </div>
+                                ))
+                            )}
                         </div>
-                    ))}
-                </div>
 
+                        {/* Localização / Objetos */}
+                        <h4 className="text-lg font-bold mb-3">Selecione o Objeto/Local Específico</h4>
+                        <div className="max-h-60 overflow-y-auto">
+                            {localidadeSecundariaSelecionada ? (
+                                locaisDisponiveis.map((objeto) => (
+                                    <div
+                                        key={objeto.id}
+                                        onClick={() => selecionarObjeto(objeto)}
+                                        className="block p-3 mb-3 rounded-lg cursor-pointer transition-colors bg-gray-800 hover:bg-green-600"
+                                    >
+                                        <p className="font-semibold text-white">{objeto.nome}</p>
+                                        <p className="text-xs text-gray-400">
+                                            {objeto.localidadeTercearia} | {objeto.localidadePrimaria}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-400">Selecione uma Localidade acima para ver os objetos.</p>
+                            )}
+                        </div>
+                    </>
+                )}
                 <MenuRodape />
-
             </div>
         </div>
     );

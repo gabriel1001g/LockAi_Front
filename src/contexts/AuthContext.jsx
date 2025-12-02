@@ -45,6 +45,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+ const username = user?.usuarioNome || user?.nome || user?.username || 'Gestor';
+
   // Objeto de valor para o Provedor
   const value = {
     user,
@@ -55,6 +57,7 @@ export const AuthProvider = ({ children }) => {
     tipoUsuarioId: user ? user.tipoUsuarioId : null,
     token: user ? user.token : null,
     isLoading,
+    username,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

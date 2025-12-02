@@ -6,7 +6,7 @@ import { useLocacao } from "../contexts/LocacaoContext";
 import { useAuth } from "../contexts/AuthContext";
 
 // ** IMPORTANTE: Troque esta URL pela sua URL base da API **
-const API_URL = "https://lockai.azurewebsites.net";
+const API_URL = "https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net";
 
 export default function Pagamento() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function Pagamento() {
 
     try {
       // A rota mais comum para APIs .NET é com /api/ antes do controlador
-      const response = await fetch(`${API_URL}/api/PropostaLocacao`, {
+      const response = await fetch(`${API_URL}/PropostaLocacao`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

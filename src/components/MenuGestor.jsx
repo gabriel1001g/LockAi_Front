@@ -24,7 +24,7 @@ export default function MenuGestor() {
 
         {/* ==================== LOCAÇÕES ==================== */}
         <NavLink
-          to="/gestor/PlanoCategoria"
+          to="/gestor/AprovacaoLocacoes"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"

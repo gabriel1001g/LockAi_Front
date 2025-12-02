@@ -1,314 +1,351 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// 🚨 Importa useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import MenuGestor from "../../components/menuGestor";
+import { useAuth } from "../../contexts/AuthContext";
+
+// URL DA API
+const API_URL =
+  "https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net";
 
 export default function HomeGestor() {
-  const navigate = useNavigate();
-  const [planos, setPlanos] = useState([]);
-  const [popupPlano, setPopupPlano] = useState(null); // plano selecionado para popup
-  const [isEditing, setIsEditing] = useState(false); // modo edição no popup
-  const [confirmDelete, setConfirmDelete] = useState(false); // confirma exclusão
-  const [localForm, setLocalForm] = useState(null); // form local usado no popup
+  const navigate = useNavigate();
+  // 🚨 Adiciona useLocation
+  const location = useLocation(); 
+  const { username, token } = useAuth(); 
 
-  // carrega planos do localStorage
-  useEffect(() => {
-    const dados = JSON.parse(localStorage.getItem("planosCriados")) || [];
-    setPlanos(dados);
-  }, []);
+  const [planos, setPlanos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); 
+  const [refreshKey, setRefreshKey] = useState(0); 
 
-  // atualiza localStorage sempre que planos mudam
-  useEffect(() => {
-    localStorage.setItem("planosCriados", JSON.stringify(planos));
-  }, [planos]);
+  const [popupPlano, setPopupPlano] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [localForm, setLocalForm] = useState(null);
 
-  function abrirPopup(plano) {
-    setPopupPlano(plano);
-    setIsEditing(false);
-    // cópia para edição local
-    setLocalForm({
-      nomePlano: plano.nomePlano,
-      dataInicio: plano.dataInicio,
-      dataFim: plano.dataFim,
-      valor: plano.valor,
-      pagamento: plano.pagamento,
-    });
-    setConfirmDelete(false);
-  }
+  // Função para recarregar a lista de planos (útil após POST/PUT/DELETE)
+  function recarregarPlanos() {
+    setRefreshKey(prev => prev + 1);
+  }
 
-  function fecharPopup() {
-    setPopupPlano(null);
-    setIsEditing(false);
-    setConfirmDelete(false);
-    setLocalForm(null);
-  }
+  // 🚨 1. BUSCAR PLANOS DA API (GET) - INCLUINDO CORREÇÃO DO $ref
+  useEffect(() => {
+    async function fetchPlanos() {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
 
-  function salvarEdicao() {
-    if (!localForm.nomePlano || !localForm.dataInicio || !localForm.dataFim || !localForm.valor || !localForm.pagamento) {
-      // você pode trocar por popup de erro; aqui usamos alert simples
-      alert("Preencha todos os campos antes de salvar.");
-      return;
-    }
+      try {
+        // 🚨 DICA: Adiciona um timestamp para evitar caching agressivo da API
+        const response = await fetch(`${API_URL}/PlanoLocacao/GetAll?_t=${Date.now()}`, { 
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    const novos = planos.map((p) =>
-      p.id === popupPlano.id ? { ...p, ...localForm } : p
-    );
-    setPlanos(novos);
-    // atualiza popup com os dados salvos
-    const atualizado = novos.find((p) => p.id === popupPlano.id);
-    setPopupPlano(atualizado);
-    setIsEditing(false);
-  }
+        if (!response.ok) {
+          throw new Error("Erro ao carregar planos: " + response.statusText);
+        }
 
-  function solicitarDelete() {
-    setConfirmDelete(true);
-  }
+        const data = await response.json();
+        
+        // Acessa a propriedade $values
+        const planosRaw = data.$values || []; 
 
-  function confirmarDelete() {
-    const novos = planos.filter((p) => p.id !== popupPlano.id);
-    setPlanos(novos);
-    fecharPopup();
-  }
+        // CORREÇÃO: Filtra os objetos de referência cíclica ($ref)
+        const planosArray = planosRaw.filter(p => !p.hasOwnProperty('$ref'));
 
-  return (
-    <div className="min-h-screen w-full bg-[#03033D] text-white flex flex-col px-4 pt-6 pb-24">
+        if (Array.isArray(planosArray)) {
+            setPlanos(planosArray);
+        } else {
+            console.error("A API retornou um formato inesperado.");
+            setPlanos([]); 
+        }
 
-      {/* Cabeçalho */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">Olá, “Nome do Usuário”</h1>
-      </div>
+    } catch (error) {
+        console.error("Erro ao buscar planos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-      {/* Adicionar plano */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-3">Adicionar plano</h2>
-        <div className="flex justify-center items-center">
-          <button
-            className="w-32 h-32 rounded-2xl border-[6px] border-blue-500 flex items-center justify-center bg-[#03033D]"
-            onClick={() => navigate("/gestor/PlanoCategoria")}
-          >
-            <span className="text-6xl font-bold text-blue-500">+</span>
-          </button>
-        </div>
-      </div>
+    fetchPlanos();
+  // refreshKey garante que o useEffect rode novamente quando recarregarPlanos for chamada
+  }, [token, refreshKey]);
 
-      {/* Usar plano */}
-      <div className="flex-1 overflow-y-auto pb-6">
-        <h2 className="text-lg font-semibold mb-4">Usar plano</h2>
 
-        {planos.length === 0 ? (
-          <p className="text-center opacity-70">Nenhum plano cadastrado ainda.</p>
-        ) : (
-          <div className="flex flex-col gap-6 w-full">
-            {planos.map((p) => (
-              <div
-                key={p.id}
-                className="bg-[#0066FF] text-white rounded-3xl p-5 shadow w-full cursor-pointer"
-                onClick={() => abrirPopup(p)}
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold mb-2">{p.nomePlano}</h3>
-                  {/* se quiser ícone, coloque aqui */}
-                </div>
+  // 🚨 2. LÓGICA DE RELOAD APÓS CRIAÇÃO
+  useEffect(() => {
+    if (location.state && location.state.reload) {
+      console.log("Recarga forçada após criação de novo plano.");
+      recarregarPlanos();
+      // Limpa o estado da navegação para evitar recargas futuras indesejadas
+      navigate("/gestor/HomeGestor", { replace: true, state: {} }); 
+    }
+  }, [location.state, navigate]);
 
-                <div className="flex flex-wrap gap-4 text-sm mb-3">
-                  <div>
-                    <p className="opacity-80 text-xs">Início</p>
-                    <p className="font-medium">{p.dataInicio}</p>
-                  </div>
-                  <div>
-                    <p className="opacity-80 text-xs">Fim</p>
-                    <p className="font-medium">{p.dataFim}</p>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center gap-4">
-                  <div>
-                    <p className="opacity-80 text-xs">Valor</p>
-                    <p className="font-medium">R$ {Number(p.valor).toFixed(2)}</p>
-                  </div>
+  // Função auxiliar para formatar data (yyyy-MM-ddTHH:mm:ss -> dd/MM/yyyy)
+  const formatarData = (dataString) => {
+    if (!dataString) return "--";
+    const data = new Date(dataString);
+    return data.toLocaleDateString("pt-BR");
+  };
 
-                  <div>
-                    <p className="opacity-80 text-xs">Pagamento</p>
-                    <p className="font-medium">{p.pagamento}</p>
-                  </div>
-                </div>
+  // Função auxiliar para formatar data para INPUT (yyyy-MM-dd)
+  const formatarDataInput = (dataString) => {
+    if (!dataString) return "";
+    return dataString.split("T")[0];
+  };
 
-                {/* Botão usar plano */}
-                <button
-                  className="mt-4 w-full bg-white text-[#0066FF] py-2 rounded-xl font-semibold"
-                  onClick={(e) => {
-                    e.stopPropagation(); // evita abrir o popup quando clicar "Usar plano"
-                    // ação de usar o plano — você pode customizar
-                    alert(`Plano "${p.nomePlano}" usado.`);
-                  }}
-                >
-                  Usar plano
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  function abrirPopup(plano) {
+    // Prevenindo abertura de pop-up para objetos $ref que possam ter passado (medida extra)
+    if (!plano || plano.hasOwnProperty('$ref')) return fecharPopup();
+      
+    setPopupPlano(plano);
+    setIsEditing(false);
 
-      <MenuGestor />
+    // Mapeando dados da API para o formulário local
+    setLocalForm({
+      nomePlano: plano.nome, 
+      dataInicio: formatarDataInput(plano.dtInicio), 
+      dataFim: formatarDataInput(plano.dtFim), 
+      valor: plano.valor, 
+      pagamento: plano.prazoPagamento, 
+    });
+    setConfirmDelete(false);
+  }
 
-      {/* POPUP (detalhes + editar + apagar) */}
-      {popupPlano && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 px-4">
-          <div className="bg-white text-black w-full max-w-md rounded-2xl p-6 shadow-xl">
-            {/* cabeçalho do popup */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">{popupPlano.nomePlano}</h3>
-              <button
-                className="text-sm text-gray-500"
-                onClick={fecharPopup}
-              >
-                Fechar
-              </button>
-            </div>
+  function fecharPopup() {
+    setPopupPlano(null);
+    setIsEditing(false);
+    setConfirmDelete(false);
+    setLocalForm(null);
+  }
 
-            {/* conteúdo: se estiver editando, mostra inputs; se não, mostra texto */}
-            {!isEditing ? (
-              <div>
-                <div className="space-y-2 mb-3">
-                  <div>
-                    <p className="text-xs opacity-70">Período</p>
-                    <p>{popupPlano.dataInicio} até {popupPlano.dataFim}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs opacity-70">Valor</p>
-                    <p>R$ {Number(popupPlano.valor).toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs opacity-70">Pagamento</p>
-                    <p>{popupPlano.pagamento}</p>
-                  </div>
-                </div>
+  // SALVAR EDIÇÃO (PUT) - Implementação Simplificada (Visual por enquanto)
+  async function salvarEdicao() {
+    alert("Edição via API ainda não implementada neste exemplo (requer PUT).");
+    // Simular recarga após sucesso
+    recarregarPlanos(); 
+    setIsEditing(false);
+  }
 
-                <div className="flex gap-3">
-                  <button
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Editar
-                  </button>
+  // DELETAR (DELETE) - Implementação Simplificada (Visual por enquanto)
+  async function confirmarDelete() {
+    alert(
+      "Exclusão via API ainda não implementada neste exemplo (requer DELETE)."
+    );
+    // Simular recarga após sucesso
+    recarregarPlanos(); 
+    fecharPopup();
+  }
 
-                  <button
-                    className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold"
-                    onClick={solicitarDelete}
-                  >
-                    Apagar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                {/* Formulário de edição inline */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-sm">Categoria</label>
-                  <input
-                    type="text"
-                    value={localForm?.nomePlano || ""}
-                    onChange={(e) => setLocalForm({ ...localForm, nomePlano: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2"
-                  />
+  function solicitarDelete() {
+    setConfirmDelete(true);
+  }
 
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <label className="text-sm">Início</label>
-                      <input
-                        type="date"
-                        value={localForm?.dataInicio || ""}
-                        onChange={(e) => setLocalForm({ ...localForm, dataInicio: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2"
-                      />
-                    </div>
+  return (
+    <div className="min-h-screen w-full bg-[#03033D] text-white flex flex-col px-4 pt-6 pb-24">
+      {/* Cabeçalho */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold">Olá, {username}</h1>
+      </div>
 
-                    <div className="flex-1">
-                      <label className="text-sm">Fim</label>
-                      <input
-                        type="date"
-                        value={localForm?.dataFim || ""}
-                        onChange={(e) => setLocalForm({ ...localForm, dataFim: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2"
-                      />
-                    </div>
-                  </div>
+      {/* Adicionar plano */}
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold mb-3">Adicionar plano</h2>
+        <div className="flex justify-center items-center">
+          <button
+            className="w-32 h-32 rounded-2xl border-[6px] border-blue-500 flex items-center justify-center bg-[#03033D]"
+            onClick={() => navigate("/gestor/PlanoCategoria")}
+          >
+            <span className="text-6xl font-bold text-blue-500">+</span>
+          </button>
+        </div>
+      </div>
 
-                  <label className="text-sm">Valor</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={localForm?.valor || ""}
-                    onChange={(e) => setLocalForm({ ...localForm, valor: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2"
-                  />
+      {/* Lista de Planos */}
+      <div className="flex-1 overflow-y-auto pb-6">
+        <h2 className="text-lg font-semibold mb-4">Planos Cadastrados</h2>
 
-                  <label className="text-sm">Pagamento</label>
-                  <select
-                    value={localForm?.pagamento || ""}
-                    onChange={(e) => setLocalForm({ ...localForm, pagamento: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2"
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Pix">Pix</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Crédito">Cartão de crédito</option>
-                    <option value="Débito">Cartão de débito</option>
-                  </select>
-                </div>
+        {isLoading ? (
+          <p className="text-center text-blue-400">Carregando planos...</p>
+        ) : planos.length === 0 ? (
+          <p className="text-center opacity-70">
+            Nenhum plano cadastrado ainda.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-6 w-full">
+            
+            {planos.map((p) => {
+              
+              return (
+                <div
+                  key={p.id} 
+                  className="bg-[#0066FF] text-white rounded-3xl p-5 shadow w-full cursor-pointer hover:bg-blue-600 transition"
+                  onClick={() => abrirPopup(p)}
+                >
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-xl font-bold mb-2">{p.nome}</h3>
+                  </div>
 
-                <div className="flex gap-3 mt-4">
-                  <button
-                    className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold"
-                    onClick={salvarEdicao}
-                  >
-                    Salvar
-                  </button>
+                  <div className="flex flex-wrap gap-4 text-sm mb-3">
+                    <div>
+                      <p className="opacity-80 text-xs">Início</p>
+                      <p className="font-medium">{formatarData(p.dtInicio)}</p>
+                    </div>
+                    <div>
+                      <p className="opacity-80 text-xs">Fim</p>
+                      <p className="font-medium">{formatarData(p.dtFim)}</p>
+                    </div>
+                  </div>
 
-                  <button
-                    className="flex-1 bg-gray-200 text-black py-2 rounded-lg font-semibold"
-                    onClick={() => {
-                      setIsEditing(false);
-                      // restaura localForm para os dados do plano caso queira descartar alterações
-                      setLocalForm({
-                        nomePlano: popupPlano.nomePlano,
-                        dataInicio: popupPlano.dataInicio,
-                        dataFim: popupPlano.dataFim,
-                        valor: popupPlano.valor,
-                        pagamento: popupPlano.pagamento,
-                      });
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
+                  <div className="flex justify-between items-center gap-4">
+                    <div>
+                      <p className="opacity-80 text-xs">Valor</p>
+                      <p className="font-medium">
+                        R$ {Number(p.valor).toFixed(2)}
+                      </p>
+                    </div>
 
-            {/* confirmação de exclusão secundária */}
-            {confirmDelete && (
-              <div className="mt-4 p-3 border-t">
-                <p className="text-sm mb-3">Tem certeza que deseja apagar este plano? Esta ação não pode ser desfeita.</p>
-                <div className="flex gap-3">
-                  <button
-                    className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold"
-                    onClick={confirmarDelete}
-                  >
-                    Sim, apagar
-                  </button>
-                  <button
-                    className="flex-1 bg-gray-200 text-black py-2 rounded-lg font-semibold"
-                    onClick={() => setConfirmDelete(false)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+                    <div>
+                      <p className="opacity-80 text-xs">Prazo (Dias)</p>
+                      <p className="font-medium">{p.prazoPagamento}</p>
+                    </div>
+                  </div>
+
+                  {/* Botão Apenas Decorativo nesta lista */}
+                  <div className="mt-3 text-center text-xs opacity-60">
+                    Toque para detalhes
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <MenuGestor />
+
+      {/* POPUP DE DETALHES (Sem alteração) */}
+      {popupPlano && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 px-4">
+          <div className="bg-white text-black w-full max-w-md rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">{popupPlano.nome}</h3>
+              <button className="text-sm text-gray-500" onClick={fecharPopup}>
+                Fechar
+              </button>
+            </div>
+
+            {!isEditing ? (
+              <div>
+                <div className="space-y-2 mb-3">
+                  <div>
+                    <p className="text-xs opacity-70">Período</p>
+                    <p>
+                      {formatarData(popupPlano.dtInicio)} até{" "}
+                      {formatarData(popupPlano.dtFim)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs opacity-70">Valor</p>
+                    <p>R$ {Number(popupPlano.valor).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs opacity-70">Prazo Pagamento</p>
+                    <p>{popupPlano.prazoPagamento} dias</p>
+                  </div>
+                  <div>
+                    <p className="text-xs opacity-70">Horário Locação</p>
+                    <p>
+                      {popupPlano.inicioLocacao} às {popupPlano.fimLocacao}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  {/* Botões de Editar/Apagar ativados para simulação */}
+                  <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={() => setIsEditing(true)}>
+                    Editar
+                  </button>
+                  <button className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={solicitarDelete}>
+                    Apagar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Lógica de edição (Inputs)
+              <div>
+                <h4 className="text-md font-bold mb-3">Editar Plano</h4>
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <label className="text-xs opacity-70 block mb-1">Nome do Plano</label>
+                    <input 
+                      type="text" 
+                      value={localForm.nomePlano || ''} 
+                      onChange={(e) => setLocalForm({...localForm, nomePlano: e.target.value})}
+                      className="w-full border border-gray-300 p-2 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs opacity-70 block mb-1">Valor (R$)</label>
+                    <input 
+                      type="number" 
+                      value={localForm.valor || 0} 
+                      onChange={(e) => setLocalForm({...localForm, valor: Number(e.target.value)})}
+                      className="w-full border border-gray-300 p-2 rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={salvarEdicao}
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Confirmação de Exclusão */}
+            {confirmDelete && (
+              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-6 rounded-2xl">
+                <p className="text-lg font-semibold mb-4 text-center">
+                  Tem certeza que deseja apagar o plano **{popupPlano.nome}**?
+                </p>
+                <div className="flex gap-3 w-full">
+                  <button 
+                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={() => setConfirmDelete(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold transition"
+                    onClick={confirmarDelete}
+                  >
+                    Confirmar Exclusão
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
