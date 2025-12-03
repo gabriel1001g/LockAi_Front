@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "../assets/img/logo.png";
-import BotaoVoltar from "../components/BotaoVoltar";
+import BotaoVoltar from "../../components/BotaoVoltar";
 import { useNavigate } from "react-router-dom";
 
-export default function Cadastro() {
+export default function CadastroGestor() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -103,7 +102,7 @@ export default function Cadastro() {
             dtNascimento: nascimento,
             telefone: telefone,
             senha: senha,
-            tipoUsuarioId: 1, // exemplo: tipo padrão (cliente comum)
+            tipoUsuarioId: 2, // exemplo: tipo padrão (cliente comum)
             situacao: 0, // exemplo: ativo (depende do enum no backend)
             dtSituacao: new Date().toISOString(),
             idUsuarioSituacao: 1,
@@ -158,10 +157,7 @@ export default function Cadastro() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center px-6">
-      {/* Logo */}
-      <div className="mb-8">
-        <img src={logo} alt="Logo" className="w-32 mx-auto" />
-      </div>
+      
 
       {/* Card de Cadastro */}
       <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md">

@@ -1,14 +1,10 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
-
 import "swiper/css";
-
-
 import "swiper/css/pagination";
 import armario from "../assets/img/armario.jpg";
 import armario2 from "../assets/img/armario2.jpg";
-
 import pc from "../assets/img/pc.jpg";
 import notbook from "../assets/img/notbook.jpg";
 import MenuRodape from "../components/MenuRodape";

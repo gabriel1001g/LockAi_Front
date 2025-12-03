@@ -25,7 +25,7 @@ export default function MenuRodape() {
 
         {/* ==================== LOCAÇÕES ==================== */}
         <NavLink
-          to="/categorias"
+          to="/UsuarioLocacao"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -38,7 +38,7 @@ export default function MenuRodape() {
 
         {/* ==================== BUSCAR ==================== */}
         <NavLink
-          to="/buscar"
+          to="/Categorias"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -46,7 +46,7 @@ export default function MenuRodape() {
           }
         >
           <Search className="w-6 h-6" />
-          <span>Buscar</span>
+          <span>Categorias</span>
         </NavLink>
 
         {/* ==================== CONTA ==================== */}

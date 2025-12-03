@@ -10,7 +10,8 @@ export default function Conta() {
   const { username, logout } = useAuth();
 
   return (
-    <div className="relative min-h-screen pb-20 bg-[#0A0F3D] text-white">
+    <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
+      <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
       <div className="flex flex-col items-center p-6 pt-10">
         
         <img
@@ -28,9 +29,7 @@ export default function Conta() {
           Meu perfil
         </button>
 
-        <button className="w-full max-w-xs bg-white text-black p-4 rounded-xl mb-4">
-          Configurações
-        </button>
+       
 
         <button
           onClick={() => setAbrirPopupSair(true)}
@@ -72,6 +71,7 @@ export default function Conta() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

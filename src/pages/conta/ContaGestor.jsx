@@ -28,8 +28,10 @@ export default function ContaGestor() {
           Meu perfil
         </button>
 
-        <button className="w-full max-w-xs bg-white text-black p-4 rounded-xl mb-4">
-          Configurações
+        <button 
+        onClick={() => navigate("/gestor/cadastrogestor")}
+        className="w-full max-w-xs bg-white text-black p-4 rounded-xl mb-4">
+          Cadastro Gestor
         </button>
 
         <button

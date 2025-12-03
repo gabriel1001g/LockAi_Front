@@ -20,6 +20,8 @@ import Conta from "./pages/conta/Conta";
 import Perfil from "./pages/conta/Perfil";
 import AprovacaoLocacoes from "./pages/gestor/AprovacaoLocacoes";
 import ContaGestor from "./pages/conta/ContaGestor";
+import UsuarioLocacao from "./pages/UsuarioLocacao";
+import CadastroGestor from "./pages/gestor/CadastroGestor";
 
 
 export default function App() {
@@ -54,10 +56,10 @@ export default function App() {
           <Route path="/reserva" element={<Reserva />} />
           <Route path="/conta/conta" element={<Conta />} />
           <Route path="/conta/perfil" element={<Perfil />} />
+          <Route path="/usuariolocacao" element={<UsuarioLocacao />} />
         </Route>
 
         {/*
-          =============================================
           ROTAS PROTEGIDAS PARA GESTOR (Tipo 2)
           =============================================
         */}
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="/gestor/PlanoCategoria" element={<PlanoCategoria />} />
           <Route path="/gestor/AprovacaoLocacoes" element={<AprovacaoLocacoes />} />
           <Route path="/conta/ContaGestor" element={<ContaGestor />} />
+          <Route path="/gestor/CadastroGestor" element={<CadastroGestor />} />
+          
           {/* <Route path="/gestor/Requerimento" element={<Requerimento />} /> */}
         </Route>
 
