@@ -51,5 +51,6 @@ jobs:
         with:
           app-name: 'Lockai-web'
           slot-name: 'Production'
-          package: .
+          package: ./dist
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3F75C3156D40455882270E66B38E4F2B }}
