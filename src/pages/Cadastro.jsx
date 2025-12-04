@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.png";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useNavigate } from "react-router-dom";
-
+//
 export default function Cadastro() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
