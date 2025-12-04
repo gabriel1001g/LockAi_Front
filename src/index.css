@@ -10,6 +10,25 @@
 }
 
 body{
-    overflow: hidden;
+    /*overflow: hidden;*/
     background-color: #000740;
+}
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Regras para ocultar a barra de scroll */
+.no-scrollbar::-webkit-scrollbar {
+    display: none; 
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  
+    scrollbar-width: none;     
+}
+.no-scrollbar::-webkit-scrollbar {
+    width: 0px; /* Reduz a largura para zero */
+    height: 0px;
+    background: transparent; /* Garante que o fundo seja transparente */
 }

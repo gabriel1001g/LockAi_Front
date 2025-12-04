@@ -18,6 +18,7 @@ export default function Planos() {
   return (
     <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
       <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
+        <div className="w-full max-w-sm px-4">
         <div className="flex justify-between items-center mb-4">
           <BotaoVoltar />
           <h1 className="text-2xl font-semibold text-white">Planos</h1>
@@ -62,6 +63,7 @@ export default function Planos() {
           </div>
 
           <MenuRodape />
+        </div>
         </div>
       </div>
     </div>

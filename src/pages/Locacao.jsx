@@ -103,6 +103,7 @@ export default function Locacao() {
     return (
         <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
             <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
+                <div className="w-full max-w-sm px-4">
                 
                 {/* Cabeçalho */}
                 <div className="flex justify-between items-center mb-4">
@@ -172,6 +173,7 @@ export default function Locacao() {
                     </>
                 )}
                 <MenuRodape />
+            </div>
             </div>
         </div>
     );

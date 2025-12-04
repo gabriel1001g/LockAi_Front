@@ -15,6 +15,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
       
       <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
+        <div className="w-full max-w-sm px-4">
         <h1 className="text-2xl font-semibold text-white mb-4">Bem Vindo!</h1>
         <h3 className="text-1 font-semibold text-white">
           Recomendamos para você
@@ -104,6 +105,7 @@ export default function Home() {
             </SwiperSlide>
           </Swiper>
           <MenuRodape></MenuRodape>
+        </div>
         </div>
       </div>
           

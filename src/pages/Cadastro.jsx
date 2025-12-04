@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.png";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useNavigate } from "react-router-dom";
-//
+
+// 🚨 COMPONENTE CORRIGIDO E AJUSTADO PARA SCROLL
+
 export default function Cadastro() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -157,14 +159,18 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center px-6">
+    // 🚨 AJUSTE 1: max-h-screen e overflow-y-auto no container principal para telas pequenas
+    // Removido justify-center para permitir que o scroll comece do topo em telas pequenas.
+    <div className="h-screen bg-background flex flex-col items-center px-6 py-8">
+      
       {/* Logo */}
-      <div className="mb-8">
+      <div className="mb-4">
         <img src={logo} alt="Logo" className="w-32 mx-auto" />
       </div>
 
       {/* Card de Cadastro */}
-      <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md">
+      {/* 🚨 AJUSTE 2: max-h-full e classe no-scrollbar para que o formulário role dentro da tela */}
+      <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md max-h-full overflow-y-auto no-scrollbar">
         <BotaoVoltar />
         <h1 className="text-xl font-semibold text-white mb-4">Cadastrar-se</h1>
         {/* Nome completo */}
@@ -287,14 +293,21 @@ export default function Cadastro() {
             !!erroSenha ||
             !!erroConfirmar ||
             senha.length === 0 ||
-            confirmarSenha.length === 0
+            confirmarSenha.length === 0 ||
+            // Adiciona verificação básica de campos obrigatórios
+            nome.length === 0 || 
+            usuario.length === 0 ||
+            email.length === 0 ||
+            nascimento.length === 0 ||
+            cpf.length < 14 || // Considera o CPF completo com máscara
+            telefone.length < 14
           }
-          className="w-full bg-secondary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-secondary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
         >
           Cadastrar-se
         </button>
         {/* Link login */}
-        <p className="text-center text-sm text-gray-300 mt-4">
+        <p className="text-center text-sm text-gray-300 mt-4 pb-2">
           Já possui uma conta?{" "}
           <Link
             to="/login"
@@ -305,7 +318,7 @@ export default function Cadastro() {
         </p>
       </div>
       
-      {/* 🚨 COMPONENTE POP-UP/NOTIFICAÇÃO */}
+      {/* COMPONENTE POP-UP/NOTIFICAÇÃO */}
       {notification.isVisible && (
         <div
           className={`fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-xl text-white z-50 transition-all duration-300 ease-in-out ${
