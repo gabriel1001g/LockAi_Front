@@ -8,6 +8,7 @@ import armario2 from "../assets/img/armario2.jpg";
 import pc from "../assets/img/pc.jpg";
 import notbook from "../assets/img/notbook.jpg";
 import MenuRodape from "../components/MenuRodape";
+//
 
 export default function Home() {
   return (
