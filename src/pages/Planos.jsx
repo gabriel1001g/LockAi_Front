@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import MenuRodape from "../components/MenuRodape";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocacao } from "../contexts/LocacaoContext";
+import armario from "../assets/img/armario.jpg";
+import armario2 from "../assets/img/armario2.jpg";
 
 export default function Planos() {
   const { atualizarLocacao } = useLocacao();
@@ -32,7 +34,7 @@ export default function Planos() {
           {/* Plano Semestral - USANDO ONCLICK */}
           <div onClick={() => selecionarPlano(1, "Semestral", 60.00)} className="block mb-5 cursor-pointer transform hover:scale-105 transition-transform">
            <img
-              src="/src/assets/img/armario2.jpg"
+              src={armario2}
               alt="Armário"
               className="w-full rounded-t-lg"
             />
@@ -50,7 +52,7 @@ export default function Planos() {
          {/* Plano Anual - USANDO ONCLICK */}
           <div onClick={() => selecionarPlano(2, "Anual", 120.00)} className="block cursor-pointer transform hover:scale-105 transition-transform">
             <img
-              src="/src/assets/img/armario2.jpg"
+              src={armario2}
               alt="Armário"
               className="w-full rounded-t-lg"
             />
