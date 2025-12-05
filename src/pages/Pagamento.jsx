@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocacao } from "../contexts/LocacaoContext";
 import { useAuth } from "../contexts/AuthContext";
+import MenuRodape from "../components/MenuRodape";
 
 // ** IMPORTANTE: Troque esta URL pela sua URL base da API **
 const API_URL = "https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net";
@@ -93,10 +94,13 @@ export default function Pagamento() {
     const localizacaoExibicao = dadosLocacao.localizacao || "--";
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
-            <div></div>
-            <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
-                <div className="w-full max-w-sm px-4">
+        <div className="flex justify-center items-stretch min-h-screen w-screen bg-[#03033D]">
+      
+      {/* 2. CONTAINER SIMULANDO O CELULAR (Borda e Fundo). Tem altura fixa (h-screen) e é flex-col para organizar conteúdo (flex-1) e rodapé. */}
+      <div className="flex flex-col h-screen w-full max-w-sm  bg-primary text-white relative">
+        
+        {/* 3. CONTEÚDO ROLÁVEL (Área principal). Ocupa o espaço restante (flex-1) e permite rolagem. */}
+        <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-20 px-4"> 
                     <div className="flex justify-between items-center mb-4">
                         <BotaoVoltar />
                         <h1 className="text-2xl font-semibold text-white">Pagamento</h1>
@@ -181,6 +185,7 @@ export default function Pagamento() {
                             </div>
                         </div>
                     )}
+                    <MenuRodape />
                 </div>
             </div>
         </div>

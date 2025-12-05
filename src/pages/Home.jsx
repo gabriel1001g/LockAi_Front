@@ -12,10 +12,13 @@ import MenuRodape from "../components/MenuRodape";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#03033D] text-white relative justify-center items-center">
+    <div className="flex justify-center items-stretch min-h-screen w-screen bg-[#03033D]">
       
-      <div className="w-full max-w-sm bg-primary p-6 rounded-2xl shadow-md mb-2">
-        <div className="w-full max-w-sm px-4">
+      {/* 2. CONTAINER SIMULANDO O CELULAR (Borda e Fundo). Tem altura fixa (h-screen) e é flex-col para organizar conteúdo (flex-1) e rodapé. */}
+      <div className="flex flex-col h-screen w-full max-w-sm  bg-primary text-white relative">
+        
+        {/* 3. CONTEÚDO ROLÁVEL (Área principal). Ocupa o espaço restante (flex-1) e permite rolagem. */}
+        <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-20 px-4"> 
         <h1 className="text-2xl font-semibold text-white mb-4">Bem Vindo!</h1>
         <h3 className="text-1 font-semibold text-white">
           Recomendamos para você

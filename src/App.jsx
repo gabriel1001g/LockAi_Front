@@ -22,6 +22,7 @@ import AprovacaoLocacoes from "./pages/gestor/AprovacaoLocacoes";
 import ContaGestor from "./pages/conta/ContaGestor";
 import UsuarioLocacao from "./pages/UsuarioLocacao";
 import CadastroGestor from "./pages/gestor/CadastroGestor";
+import CadastroObjeto from "./pages/gestor/CadastroObjeto";
 
 
 export default function App() {
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/gestor/AprovacaoLocacoes" element={<AprovacaoLocacoes />} />
           <Route path="/conta/ContaGestor" element={<ContaGestor />} />
           <Route path="/gestor/CadastroGestor" element={<CadastroGestor />} />
+          <Route path="/gestor/CadastroObjetos" element={<CadastroObjeto />} />
           
           {/* <Route path="/gestor/Requerimento" element={<Requerimento />} /> */}
         </Route>

@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+// ESTE É O IMPORT CRÍTICO QUE ESTAVA FALTANDO OU INCOMPLETO
+import { Link, useNavigate } from "react-router-dom"; 
 import logo from "../assets/img/logo.png";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // 👈 MANTIDO E USADO AQUI!
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [erroSenha, setErroSenha] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // 👈 USADO AQUI
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
+  // useNavigate está definido aqui
   const navigate = useNavigate();
-  const { login } = useAuth(); // 👈 DESESTRUTURANDO A FUNÇÃO LOGIN
+  const { login } = useAuth(); 
 
-  // 📝 ALTERAÇÃO NA FUNÇÃO handleLogin
+  const showMessage = (title, message) => {
+      console.error(`[${title}]`, message); 
+  };
+
   const handleLogin = async () => {
-    setIsSubmitting(true); // 👈 INICIA O ESTADO DE SUBMISSÃO
+    setIsSubmitting(true); 
 
-    // Você pode adicionar uma validação final aqui para o caso de o botão ser clicado antes da validação da senha terminar
     if (!!erroSenha || senha.length === 0) {
       setIsSubmitting(false);
       return;
@@ -33,60 +36,51 @@ export default function Login() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          Login: usuario, // Isso precisa estar igual ao nome da propriedade esperada no DTO (LoginDto)
+          Login: usuario, 
           Senha: senha,
         }),
       });
 
-      // Se a resposta não for 2xx (por exemplo, 401 ou 500)
       if (!response.ok) {
         if (response.status === 401) {
-          alert("Usuário ou senha inválidos.");
+          showMessage("Erro de Login", "Usuário ou senha inválidos.");
         } else {
-          // Tenta pegar a mensagem de erro do corpo da resposta, se existir
           const errorText = await response.text();
-          alert("Erro ao realizar login. Tente novamente." + (errorText ? ` Detalhe: ${errorText.substring(0, 100)}` : ""));
+          showMessage("Erro de Login", "Erro ao realizar login. Tente novamente." + (errorText ? ` Detalhe: ${errorText.substring(0, 100)}` : ""));
         }
-        setIsSubmitting(false); // 👈 PARAR O LOADING EM CASO DE ERRO
+        setIsSubmitting(false); 
         return;
       }
 
-      // Aqui você recebe o objeto JSON retornado pelo controlador (DEVE CONTER token e tipoUsuarioId)
       const data = await response.json();
-
       console.log("Login efetuado:", data);
 
-  const authData = {
-        
-        token: data.token, // Lê o token da raiz
-        
-        // 🚨 Mapeia para a nova propriedade 'tipoUsuarioId' (retornada pelo Backend)
-        tipoUsuarioId: data.usuario?.tipoUsuarioId ? parseInt(data.usuario.tipoUsuarioId, 10) : 1, 
-        
-        id: data.usuario?.id ? parseInt(data.usuario.id, 10) : null, 
-
-        nomeUsuario: data.usuario?.login || "Usuário Teste", 
-      };
-      
-      // 2. Salva o objeto mapeado no Contexto
-      login(authData); 
-console.log("Tipo de Usuário LIDO pelo Frontend:", authData.tipoUsuarioId);
+      const authData = {
+        token: data.token, 
+        tipoUsuarioId: data.usuario?.tipoUsuarioId ? parseInt(data.usuario.tipoUsuarioId, 10) : 1, 
+        id: data.usuario?.id ? parseInt(data.usuario.id, 10) : null, 
+        // Mapeamento correto para a chave 'login' que o contexto espera para o nome.
+        login: data.usuario?.login || "Usuário Teste", 
+      };
       
-      
-      // 3. Redirecionamento com o tipoUsuarioId agora mapeado corretamente
-      if (authData.tipoUsuarioId === 1) {
-        navigate("/home"); 
-      } else if (authData.tipoUsuarioId === 2) {
-        navigate("/gestor/HomeGestor"); 
-      } else {
-        navigate("/home"); 
-      }
-    } catch (error) {
-      // ...
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      login(authData); 
+      console.log("Tipo de Usuário LIDO pelo Frontend:", authData.tipoUsuarioId);
+      
+      
+      // Redirecionamento 
+      if (authData.tipoUsuarioId === 1) {
+        navigate("/home"); 
+      } else if (authData.tipoUsuarioId === 2) {
+        navigate("/gestor/HomeGestor"); 
+      } else {
+        navigate("/home"); 
+      }
+    } catch (error) {
+       showMessage("Erro de Conexão", "Não foi possível conectar ao servidor. Verifique sua rede.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleUsuarioChange = (e) => {
     const value = e.target.value;
@@ -115,6 +109,7 @@ console.log("Tipo de Usuário LIDO pelo Frontend:", authData.tipoUsuarioId);
     <div className="min-h-screen bg-background flex flex-col justify-center items-center px-6">
       {/* Logo */}
       <div className="mb-8">
+        {/* Placeholder para a imagem da logo */}
         <img src={logo} alt="Logo Lockai" className="w-32 mx-auto" />
       </div>
 
@@ -171,13 +166,13 @@ console.log("Tipo de Usuário LIDO pelo Frontend:", authData.tipoUsuarioId);
           </Link>
         </div>
 
-        {/* 📝 ALTERAÇÃO NO BOTÃO */}
+        {/* Botão de Login */}
         <button
           onClick={handleLogin}
-          disabled={!!erroSenha || senha.length === 0 || isSubmitting} // 👈 Adicionado isSubmitting
+          disabled={!!erroSenha || senha.length === 0 || isSubmitting}
           className="w-full bg-secondary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Entrando..." : "Entrar"} {/* 👈 Feedback visual */}
+          {isSubmitting ? "Entrando..." : "Entrar"}
         </button>
 
         {/* Cadastro */}

@@ -37,7 +37,7 @@ export default function MenuGestor() {
 
         {/* ==================== REQUERIMENTO ==================== */}
         <NavLink
-          to="/gestor/requerimento"
+          to="/gestor/CadastroObjetos"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 ${
               isActive ? "text-blue-500" : "text-gray-300 hover:text-white"
@@ -45,7 +45,7 @@ export default function MenuGestor() {
           }
         >
           <Search className="w-6 h-6" />
-          <span>Requerimento</span>
+          <span>Objetos</span>
         </NavLink>
 
         {/* ==================== CONTA ==================== */}

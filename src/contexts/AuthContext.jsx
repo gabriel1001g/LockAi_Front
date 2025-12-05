@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 // Função customizada para usar o contexto
 export const useAuth = () => {
-  const context = useContext(AuthContext); // <-- Se esta for a linha 9
+  const context = useContext(AuthContext); 
   if (!context) {
     throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   }
@@ -14,7 +14,6 @@ export const useAuth = () => {
 
 // 2. Provedor do Contexto
 export const AuthProvider = ({ children }) => {
-  // 1. NOVO ESTADO: Adicione um estado de carregamento
   const [isLoading, setIsLoading] = useState(true);
 
   const [user, setUser] = useState(() => {
@@ -30,13 +29,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("user");
     }
 
-    // 🚨 NOVO: Define isLoading como false após a verificação inicial
     setIsLoading(false);
   }, [user]);
 
-  // Função de Login: Salva os dados do usuário (incluindo token e tipoUsuarioId)
+  // Função de Login: Salva os dados do usuário
+  // CORREÇÃO: Espera que o objeto 'userData' seja o objeto mapeado pelo frontend
   const login = (userData) => {
-    // userData deve ser o objeto retornado pela API: { token: '...', tipoUsuarioId: 1 ou 2, ... }
+    // Agora o 'userData' já deve ter 'login', 'token', e 'tipoUsuarioId' na raiz,
+    // conforme mapeado no componente Login.jsx
     setUser(userData);
   };
 
@@ -45,7 +45,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
- const username = user?.usuarioNome || user?.nome || user?.username || 'Gestor';
+  // LÓGICA CORRIGIDA: Prioriza 'login' (que contém 'Gabriel11' no seu exemplo)
+  // Depois verifica outros campos, e usa 'Usuário Logado' como último fallback se o user existir.
+  const username = user?.login || user?.usuarioNome || user?.nome || user?.email || (user ? 'Usuário Logado' : 'Gestor');
 
   // Objeto de valor para o Provedor
   const value = {
@@ -53,9 +55,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     isAuthenticated: !!user,
-    // Garante que tipoUsuarioId seja null se user for null
-    tipoUsuarioId: user ? user.tipoUsuarioId : null,
-    token: user ? user.token : null,
+    // Garante que tipoUsuarioId e token sejam lidos da raiz do objeto 'user'
+    tipoUsuarioId: user?.tipoUsuarioId || null,
+    token: user?.token || null,
     isLoading,
     username,
   };
