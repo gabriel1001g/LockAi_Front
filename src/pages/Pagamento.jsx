@@ -5,6 +5,8 @@ import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocacao } from "../contexts/LocacaoContext";
 import { useAuth } from "../contexts/AuthContext";
 import MenuRodape from "../components/MenuRodape";
+import qrcode_pix from "../assets/img/qrcode_pix.jpg";
+
 
 // ** IMPORTANTE: Troque esta URL pela sua URL base da API **
 const API_URL = "https://lockaiapii-g7egamgghuhrhrej.brazilsouth-01.azurewebsites.net";
@@ -145,7 +147,7 @@ export default function Pagamento() {
                             <div className="bg-white p-5 rounded-xl w-48 h-48 flex items-center justify-center mx-auto">
                                 <div className="text-center">
                                     <img
-                                        src="/src/assets/img/qrcode_pix.jpg"
+                                        src={qrcode_pix}
                                         alt="QR Code PIX"
                                         className="w-full h-full object-contain"
                                     />
